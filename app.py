@@ -43,36 +43,38 @@ def get_prediction(team1, team2):
 # 3. PREDICTION JOB
 def job():
     print(f'Executing prediction job at {datetime.now()}')
+    
     try:
         df = pd.read_csv('ipl_2026_schedule.csv')
 
-# Normalize column names
-df.columns = df.columns.str.lower()
+        # ✅ MUST be inside try block
+        df.columns = df.columns.str.lower()
 
-# Convert date format
-df['date'] = pd.to_datetime(df['date'], format='%d-%b-%y').dt.strftime('%Y-%m-%d')
+        # Convert date
+        df['date'] = pd.to_datetime(df['date'], format='%d-%b-%y').dt.strftime('%Y-%m-%d')
 
-# Rename columns to match 
-df.rename(columns={
-    'home': 'team1',
-    'away': 'team2'
-}, inplace=True)
+        # Rename columns
+        df.rename(columns={
+            'home': 'team1',
+            'away': 'team2'
+        }, inplace=True)
 
-today = datetime.now().strftime('%Y-%m-%d')
+        today = datetime.now().strftime('%Y-%m-%d')
+        matches = df[df['date'] == today]
 
-matches = df[df['date'] == today]
-        
         if matches.empty:
             print(f'No matches today ({today})')
             return
-            
+
         msg = f'🏏 IPL Prediction-2026\nDate: {today}\n'
+
         for _, row in matches.iterrows():
             winner, conf = get_prediction(row['team1'], row['team2'])
             msg += f'\nMatch: {row["team1"].upper()} vs {row["team2"].upper()}\nWinner: {winner}\nConfidence: {conf:.0%}\n'
-        
+
         send_telegram(msg)
         print('Predictions sent successfully.')
+
     except Exception as e:
         print(f'Job Error: {e}')
 
