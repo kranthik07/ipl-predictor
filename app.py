@@ -45,8 +45,22 @@ def job():
     print(f'Executing prediction job at {datetime.now()}')
     try:
         df = pd.read_csv('ipl_2026_schedule.csv')
-        today = datetime.now().strftime('%Y-%m-%d')
-        matches = df[df['date'] == today]
+
+# Normalize column names
+df.columns = df.columns.str.lower()
+
+# Convert date format
+df['date'] = pd.to_datetime(df['date'], format='%d-%b-%y').dt.strftime('%Y-%m-%d')
+
+# Rename columns to match 
+df.rename(columns={
+    'home': 'team1',
+    'away': 'team2'
+}, inplace=True)
+
+today = datetime.now().strftime('%Y-%m-%d')
+
+matches = df[df['date'] == today]
         
         if matches.empty:
             print(f'No matches today ({today})')
